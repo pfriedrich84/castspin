@@ -1,6 +1,6 @@
 # CastSpin — Home Assistant App (experimental)
 
-This release is an **installable foundation**, not yet a working Google Cast receiver or Sendspin audio server.
+This release is an **experimental foundation**, not yet a working Google Cast receiver or Sendspin audio server. Container build/start checks do not establish that installation under Home Assistant Supervisor works; a real Supervisor install remains an acceptance gate.
 
 ## Install
 
