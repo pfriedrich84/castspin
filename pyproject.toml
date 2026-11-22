@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "castspin-gateway"
+version = "0.1.0.dev0"
+description = "Experimental CastSpin receiver/output component spike"
+requires-python = ">=3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = [
+  "aiosendspin[server]==10.3.0",
+  "cast-audio-receiver-lab",
+]
+
+[tool.uv.sources]
+cast-audio-receiver-lab = { git = "https://github.com/Allcrafter1/cast-audio-receiver-lab.git", rev = "e56aa32df13168657a70ba42d97fd5821d8533cc" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["castspin_gateway*"]
