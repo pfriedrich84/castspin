@@ -48,7 +48,7 @@ jobs:
           set -euo pipefail
           docker run --detach --name castspin-test --publish 127.0.0.1:8099:8099 castspin:test
           trap 'docker logs castspin-test; docker rm --force castspin-test' EXIT
-          curl --fail --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:8099/healthz > /tmp/health.json
+          curl --fail --retry 20 --retry-all-errors --retry-delay 1 --connect-timeout 2 --max-time 3 http://127.0.0.1:8099/healthz > /tmp/health.json
           python3 - <<'PY'
           import json
           from pathlib import Path
