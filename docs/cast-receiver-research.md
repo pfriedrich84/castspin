@@ -1,5 +1,12 @@
 # Cast receiver feasibility — 2026-11-22
 
+> Historical investigation checkpoint from PR #3. Its receiver selection and
+> sequencing are superseded by [ADR 0002](adr/0002-reuse-cast-audio-receiver-lab.md):
+> prioritize Cast Audio Receiver Lab component reuse and a Sendspin backend.
+> See the [current pinned seam analysis](receiver-reuse-analysis.md). The inventory
+> below is preserved as evidence, not an instruction to continue a separate
+> openchromecast product path. Authentication and real-device gates still apply.
+
 ## What must be proved
 
 Issue [#1](https://github.com/pfriedrich84/castspin/issues/1) requires a **native
