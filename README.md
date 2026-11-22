@@ -8,7 +8,7 @@ Goal: expose independent Sendspin audio players (Sauna, Garden, etc.) as individ
 
 ## Home Assistant App (preview)
 
-After this branch merges, add `https://github.com/pfriedrich84/castspin` as a custom repository under Home Assistant Settings → Apps → Install app → Repositories. Install and start CastSpin, then open its Ingress UI.
+Add `https://github.com/pfriedrich84/castspin` as a custom repository under Home Assistant Settings → Apps → Install app → Repositories. Install and start CastSpin, then open its Ingress UI.
 
 The UI reports current implementation status. See [app documentation](castspin/DOCS.md).
 
@@ -22,6 +22,14 @@ The UI reports current implementation status. See [app documentation](castspin/D
 6. Optional standalone Docker Compose deployment.
 
 A Google Cast controller library is **not** a Cast receiver.
+
+## Development and validation
+
+Run `python3 -m unittest discover -s tests -v` and `sh -n castspin/run.sh`.
+CI runs the HTTP contract tests on Python 3.13–3.15 and builds and starts the
+actual App image on native amd64 and aarch64 runners. These are **not** a
+Home Assistant Supervisor installation or a Cast/Sendspin audio acceptance test.
+See [validation](docs/validation.md) for the remaining gates.
 
 ## License
 
