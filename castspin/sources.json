@@ -1,0 +1,155 @@
+{
+  "receiver_image": "ghcr.io/allcrafter1/cast-audio-receiver:0.8.0-dev2@sha256:c3ee8a484939512fe57a9dcb763804c5a01542243489bdc8ab396934bb93b2b8",
+  "receiver_image_revision": "8be809bbef191e32ad083f2dee8c6ed3b7973a51",
+  "native_base": "83ba470158189de3bc223701decdc4c502d47644",
+  "native_patch_sha256": "afbb9f5086641c3e2546e5e2bb79f4cbfcc7c4dfffb7fed4b9ebc19be1916434",
+  "sources": [
+    {
+      "name": "aiohappyeyeballs",
+      "version": "2.7.1",
+      "url": "https://files.pythonhosted.org/packages/ce/f4/eec0465c2f67b2664688d0240b3212d5196fd89e741df67ddb81f8d35658/aiohappyeyeballs-2.7.1.tar.gz",
+      "sha256": "065665c041c42a5938ed220bdcd7230f22527fbec085e1853d2402c8a3615d9d",
+      "filename": "aiohappyeyeballs-2.7.1.tar.gz"
+    },
+    {
+      "name": "aiohttp",
+      "version": "3.14.5",
+      "url": "https://files.pythonhosted.org/packages/6c/4c/bdccd81e9ee225b69c60e7766c9a5b05364f118f4d383713b89a682d772d/aiohttp-3.14.5.tar.gz",
+      "sha256": "5558a7f5a05af9ecf744af91e5baefc436f93c9333e656c27ec253f9a6bbe178",
+      "filename": "aiohttp-3.14.5.tar.gz"
+    },
+    {
+      "name": "aiosignal",
+      "version": "1.4.0",
+      "url": "https://files.pythonhosted.org/packages/61/62/06741b579156360248d1ec624842ad0edf697050bbaf7c3e46394e106ad1/aiosignal-1.4.0.tar.gz",
+      "sha256": "f47eecd9468083c2029cc99945502cb7708b082c232f9aca65da147157b251c7",
+      "filename": "aiosignal-1.4.0.tar.gz"
+    },
+    {
+      "name": "anyascii",
+      "version": "0.3.3",
+      "url": "https://files.pythonhosted.org/packages/db/ba/edebda727008390936da4a9bf677c19cd63b32d51e864656d2cbd1028e25/anyascii-0.3.3.tar.gz",
+      "sha256": "c94e9dd9d47b3d9494eca305fef9447d00b4bf1a32aff85aa746fa3ec7fb95c3",
+      "filename": "anyascii-0.3.3.tar.gz"
+    },
+    {
+      "name": "attrs",
+      "version": "26.1.0",
+      "url": "https://files.pythonhosted.org/packages/9a/8e/82a0fe20a541c03148528be8cac2408564a6c9a0cc7e9171802bc1d26985/attrs-26.1.0.tar.gz",
+      "sha256": "d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32",
+      "filename": "attrs-26.1.0.tar.gz"
+    },
+    {
+      "name": "cast-audio-receiver-lab",
+      "version": "e56aa32df13168657a70ba42d97fd5821d8533cc",
+      "url": "https://github.com/Allcrafter1/cast-audio-receiver-lab/archive/e56aa32df13168657a70ba42d97fd5821d8533cc.tar.gz",
+      "sha256": "67cde225a54f170935dd807c2e8f9a223febbf1e78bbf2ba4946f12d733cf54f",
+      "filename": "cast-audio-receiver-lab-e56aa32.tar.gz"
+    },
+    {
+      "name": "frozenlist",
+      "version": "1.8.0",
+      "url": "https://files.pythonhosted.org/packages/2d/f5/c831fac6cc817d26fd54c7eaccd04ef7e0288806943f7cc5bbf69f3ac1f0/frozenlist-1.8.0.tar.gz",
+      "sha256": "3ede829ed8d842f6cd48fc7081d7a41001a56f1f38603f9d49bf3020d59a31ad",
+      "filename": "frozenlist-1.8.0.tar.gz"
+    },
+    {
+      "name": "idna",
+      "version": "3.20",
+      "url": "https://files.pythonhosted.org/packages/f5/08/8eea9d4b8302028f3abb2c0813953f7aec26d33b7a8960ed760e65ff29fa/idna-3.20.tar.gz",
+      "sha256": "a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44",
+      "filename": "idna-3.20.tar.gz"
+    },
+    {
+      "name": "ifaddr",
+      "version": "0.2.0",
+      "url": "https://files.pythonhosted.org/packages/e8/ac/fb4c578f4a3256561548cd825646680edcadb9440f3f68add95ade1eb791/ifaddr-0.2.0.tar.gz",
+      "sha256": "cc0cbfcaabf765d44595825fb96a99bb12c79716b73b44330ea38ee2b0c4aed4",
+      "filename": "ifaddr-0.2.0.tar.gz"
+    },
+    {
+      "name": "mashumaro",
+      "version": "3.23",
+      "url": "https://files.pythonhosted.org/packages/09/18/6383ce957a0551d8704936ffef1ecf0b0c620543999a44f9adf6c5f30888/mashumaro-3.23.tar.gz",
+      "sha256": "ed69d5bc548c76efbb5286cc0e541a6b8796e621385f986e25b750364011abf5",
+      "filename": "mashumaro-3.23.tar.gz"
+    },
+    {
+      "name": "multidict",
+      "version": "7.2.1",
+      "url": "https://files.pythonhosted.org/packages/7b/6b/29ef8e752f5854dcc267ded0652c475bec99b86f255957a0d4fcad657b18/multidict-7.2.1.tar.gz",
+      "sha256": "e8af3e6f1bdbc31fd762b094133b478b89988eaebc63cbe82b1d9e3bbd15cede",
+      "filename": "multidict-7.2.1.tar.gz"
+    },
+    {
+      "name": "music-assistant-client",
+      "version": "1.8.1",
+      "url": "https://files.pythonhosted.org/packages/77/78/3bbf7b76974322c74fa3800c51b34484acc4e0ec81b21a3e847569edef41/music_assistant_client-1.8.1.tar.gz",
+      "sha256": "0baa5f5b7485711873e7f96467af387bb78134fe8e00f2119332b1d56b50b72d",
+      "filename": "music_assistant_client-1.8.1.tar.gz"
+    },
+    {
+      "name": "music-assistant-models",
+      "version": "1.1.242",
+      "url": "https://files.pythonhosted.org/packages/cb/6b/e4f8d9b994c5217e2adab0d49a596cb9e0796aca701b808f08787719b9d1/music_assistant_models-1.1.242.tar.gz",
+      "sha256": "d0b2965c62da8d0044531b49930489ffc04fcfb9a0df291b6a9f39a58b1f3cce",
+      "filename": "music_assistant_models-1.1.242.tar.gz"
+    },
+    {
+      "name": "orjson",
+      "version": "3.13.0",
+      "url": "https://files.pythonhosted.org/packages/f2/72/380b97dc45bd162d23afe5194721ef678d9eac7cfaa549fe2873f7f0a518/orjson-3.13.0.tar.gz",
+      "sha256": "d1de5eb04485110c5da4c657e49168995d55e076b1ce60f1a042e254f4186c4f",
+      "filename": "orjson-3.13.0.tar.gz"
+    },
+    {
+      "name": "propcache",
+      "version": "0.5.4",
+      "url": "https://files.pythonhosted.org/packages/b3/9a/9fbf4e4ec0c2d7f1c32519fff782ef467859b8faa9fbc5331a96f6395d43/propcache-0.5.4.tar.gz",
+      "sha256": "ff6b113f50bc066a698db5d944d2c6dc7507168dd3341e255a8892fd0715a558",
+      "filename": "propcache-0.5.4.tar.gz"
+    },
+    {
+      "name": "setuptools",
+      "version": "82.0.0",
+      "url": "https://files.pythonhosted.org/packages/82/f3/748f4d6f65d1756b9ae577f329c951cda23fb900e4de9f70900ced962085/setuptools-82.0.0.tar.gz",
+      "sha256": "22e0a2d69474c6ae4feb01951cb69d515ed23728cf96d05513d36e42b62b37cb",
+      "filename": "setuptools-82.0.0.tar.gz"
+    },
+    {
+      "name": "typing-extensions",
+      "version": "4.16.0",
+      "url": "https://files.pythonhosted.org/packages/f6/cc/6253133b5bb138fc3306cebfbda2c520f545d36b5be2c7255cc528bb45d6/typing_extensions-4.16.0.tar.gz",
+      "sha256": "dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5",
+      "filename": "typing_extensions-4.16.0.tar.gz"
+    },
+    {
+      "name": "vibecast-vendored-source",
+      "version": "0.8.0-dev2",
+      "url": "https://github.com/Allcrafter1/cast-audio-receiver-lab/releases/download/v0.8.0-dev2/vibecast-vendored-source.tar.gz",
+      "sha256": "642b313f0ef620607b7cae337bd41f5381e13c8da93955ff8bbca6bac19ee08e",
+      "filename": "vibecast-vendored-source-0.8.0-dev2.tar.gz"
+    },
+    {
+      "name": "websockets",
+      "version": "17.4",
+      "url": "https://files.pythonhosted.org/packages/75/79/590c5f0cc7d1661195aeefccb0e342b79f4c77d368d526d028821a390332/websockets-17.4.tar.gz",
+      "sha256": "09d3939b70df0c8ad2da145ebd50978bccaee1d565e838b0e7921a34d38571eb",
+      "filename": "websockets-17.4.tar.gz"
+    },
+    {
+      "name": "yarl",
+      "version": "1.25.1",
+      "url": "https://files.pythonhosted.org/packages/75/16/e8be8e2fb175bbf41a0680381a319f1199fae256588241a2ac8677eafb49/yarl-1.25.1.tar.gz",
+      "sha256": "03dd38de09bc213e9a8b29761eec33ee1d5318dac0e49d8af36e4d27830e23a7",
+      "filename": "yarl-1.25.1.tar.gz"
+    },
+    {
+      "name": "zeroconf",
+      "version": "0.154.0",
+      "url": "https://files.pythonhosted.org/packages/d6/dd/b1eb6a87dc0376289fb78c13231c4702797da49dd0da062c5d46a4cff865/zeroconf-0.154.0.tar.gz",
+      "sha256": "830315497af9bbd75924c2218cd3b64f0bde0e808ee316aabb5d9288836c0c43",
+      "filename": "zeroconf-0.154.0.tar.gz"
+    }
+  ]
+}

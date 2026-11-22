@@ -12,6 +12,33 @@ from urllib.parse import urlsplit
 
 PORT = int(os.environ.get("CASTSPIN_PORT", "8099"))
 CONFIG = Path(os.environ.get("CASTSPIN_CONFIG", "/data/mappings.json"))
+RUNTIME_STATUS = None
+
+
+def runtime_page(status):
+    labels = {"disabled": "Deaktiviert", "waiting_for_certificate": "Cast-Authentifizierung fehlt",
+              "starting": "Verbindung wird aufgebaut", "player_bridge_connected": "Player-Bridge verbunden",
+              "configuration_error": "Konfiguration prüfen", "attention_required": "Music Assistant prüfen",
+              "error": "Verbindung fehlgeschlagen", "stopped": "Gestoppt"}
+    state = labels.get(status.get("cast_receiver"), "Status unbekannt")
+    rows = "".join("<li><strong>" + escape(str(route["name"])) + "</strong> — "
+                   + escape(str(route["playback_state"])) + "</li>"
+                   for route in status.get("routes", []))
+    return ('<!doctype html><html lang="de"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1"><title>CastSpin</title>'
+            '<style>body{font:16px/1.6 system-ui,sans-serif;max-width:72ch;margin:3rem auto;'
+            'padding:0 1.5rem;color:#ddd;background:#111827;overflow-wrap:anywhere}'
+            'h2{margin-top:2rem}a{color:#93c5fd;text-underline-offset:.2em}'
+            'a:focus-visible{outline:2px solid #93c5fd;outline-offset:4px}</style></head><body>'
+            '<main><h1>CastSpin</h1><h2>' + escape(state) + '</h2><p>'
+            + escape(str(status.get("message", ""))) + '</p>'
+            '<p>Die Geräte werden automatisch aus Music Assistant übernommen. '
+            'URL, Zugriffstoken und LAN-Adresse werden in der App-Konfiguration hinterlegt.</p>'
+            '<h2>Music-Assistant-Wiedergabeziele</h2><ul>'
+            + (rows or '<li>Noch keine Geräte übernommen. Konfiguration und Verbindung prüfen.</li>')
+            + '</ul><p>Eine verbundene Player-Bridge bestätigt weder die Sichtbarkeit in '
+            'YouTube Music noch erfolgreiche Cast-Authentifizierung oder hörbare Wiedergabe.</p>'
+            '<p><a href="">Status aktualisieren</a></p></main></body></html>')
 
 
 def read_mappings():
@@ -23,16 +50,26 @@ def read_mappings():
 
 
 class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *_args):
+        pass  # Never log request paths/query strings that may contain secrets.
+
     def do_GET(self):
+        if self.client_address[0] not in {"127.0.0.1", "172.30.32.2"}:
+            self.respond(403, "Use Home Assistant Ingress", "text/plain")
+            return
         path = urlsplit(self.path).path
-        if path in ("/health", "/healthz"):
-            self.respond(200, '{"status":"ok","cast_receiver":"not_implemented","sendspin":"not_implemented"}', "application/json")
+        snapshot = RUNTIME_STATUS
+        if path in ("/health", "/healthz", "/api/status"):
+            self.respond(200, json.dumps(snapshot) if snapshot is not None else '{"status":"ok","cast_receiver":"not_implemented","sendspin":"not_implemented"}', "application/json")
             return
         if path == "/api/mappings":
             self.respond(200, json.dumps({"mappings": read_mappings(), "operational": False}), "application/json")
             return
         if path not in ("/", "/index.html"):
             self.respond(404, "Not found", "text/plain")
+            return
+        if snapshot is not None:
+            self.respond(200, runtime_page(snapshot), "text/html; charset=utf-8")
             return
         rows = "".join(
             "<li><strong>" + escape(str(item.get("name", "Unnamed"))) + "</strong> → " +
@@ -57,6 +94,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'")
         self.end_headers()
         self.wfile.write(data)
 

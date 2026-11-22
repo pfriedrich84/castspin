@@ -88,6 +88,25 @@ class FoundationTests(unittest.TestCase):
                 self.assertEqual(self.get("/")[0], 200)
                 self.assertEqual(self.get("/api/mappings")[0], 200)
 
+    def test_runtime_status_is_rendered_without_claiming_audio_readiness(self):
+        snapshot = {"status": "ok", "cast_receiver": "waiting_for_certificate",
+                    "audio_verified": False, "message": "Provide authorized material",
+                    "routes": [{"name": "<script>Sauna</script>", "playback_state": "IDLE"}]}
+        with patch.object(server, "RUNTIME_STATUS", snapshot):
+            self.assertEqual(json.loads(self.get("/api/status")[2]), snapshot)
+            body = self.get("/")[2]
+            self.assertIn("Cast-Authentifizierung fehlt", body)
+            self.assertIn("&lt;script&gt;Sauna&lt;/script&gt;", body)
+            self.assertNotIn("<script>", body)
+            self.assertIn("weder die Sichtbarkeit", body)
+
+    def test_non_ingress_non_local_clients_are_rejected(self):
+        handler = object.__new__(server.Handler)
+        handler.client_address = ("192.0.2.50", 1234)
+        with patch.object(handler, "respond", create=True) as respond:
+            handler.do_GET()
+            respond.assert_called_once_with(403, "Use Home Assistant Ingress", "text/plain")
+
     def test_unknown_path_does_not_expose_files(self):
         for path in ("/missing", "/../run.sh", "/data/mappings.json"):
             self.assertEqual(self.get(path), (404, "text/plain", "Not found"))

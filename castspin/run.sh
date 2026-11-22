@@ -1,3 +1,4 @@
 #!/bin/sh
 set -eu
-exec python3 /opt/castspin/server.py
+cd /opt/castspin
+exec python3 -m castspin.app.runtime
