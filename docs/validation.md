@@ -38,9 +38,57 @@ sanitized logs. At minimum:
 A generated fixture, synthetic sender, permissive controller, or mocked output
 can test code paths, but cannot pass this gate.
 
-## Reused receiver / Sendspin adapter (not implemented)
+## Music Assistant mirroring (software prototype)
 
-Follow [ADR 0002](adr/0002-reuse-cast-audio-receiver-lab.md): compose the existing
+[ADR 0003](adr/0003-music-assistant-player-mirroring.md) makes all public MA audio
+targets in the phone's YouTube Music picker the current product requirement. A
+single test receiver is only the first acceptance step. The independent
+Sendspin-server slice below is not required for MA-owned playback.
+
+Use a fresh Python >=3.13 virtual environment; the App does not install these
+dependencies or enable this prototype yet:
+
+```sh
+python3 -m venv .venv-ma
+.venv-ma/bin/python -m pip install --require-hashes -r tests/ma/build-requirements.txt
+.venv-ma/bin/python -m pip install --require-hashes --no-build-isolation -r tests/ma/requirements.txt
+.venv-ma/bin/python -m pip check
+.venv-ma/bin/python -W error::ResourceWarning -m unittest discover -s tests/ma -v
+```
+
+Build requirements are separately hashed and installed first: the upstream
+source wheel must not acquire unpinned build dependencies. `requirements.in`
+selects the reviewed source archive by revision and SHA-256; `requirements.txt`
+locks the transitive runtime artifacts. Regenerate each lock with
+`uv pip compile INPUT --python-version 3.13 --generate-hashes --no-header --no-annotate --output-file OUTPUT`.
+
+The tests use the **actual official MA client and actual upstream
+VibecastAudioPlayer** over loopback WebSockets, with an explicitly labeled MA API
+simulator. They cover inventory additions/removal/renaming, stable bridge IDs,
+private/disabled/internal/own-device exclusion, offline target registration,
+two independent routes, controls, MA volume/mute preservation, explicit MA group
+volume, initial authentication failure, remote errors, deadlines, cancellation,
+unconfirmed outcomes and listener/session cleanup. They do not run a native Cast
+receiver or real MA server and do not transfer or decode audio.
+
+A timeout/cancellation cannot cancel a remote MA operation. An already-applied
+LOAD can be identified and stopped; a still-unconfirmed LOAD reports an error
+rather than claiming cleanup or taking ownership of a prior identical URL.
+Future App integration must expose `command_outcome_unknown` and
+`cleanup_unconfirmed`; it must not replay or silently recover ambiguous writes.
+The API's check/control race with other controllers is not eliminated.
+
+Remaining acceptance: real App installation/native state persistence and mDNS;
+reviewed authorized Cast authentication; actual YouTube Music app ID/session and
+picker visibility; media URL/header/proxy reachability **from MA**; decoded and
+audible output; every eligible target and existing MA group; recursion safeguards
+against actual MA discovery; simultaneous routes and restart/upgrade behavior.
+There is no live MA, phone, HA Supervisor or audible evidence for this slice.
+
+## Reused receiver / independent Sendspin adapter (not implemented)
+
+For the separate direct-output experiment in #5 / draft PR #6, follow
+[ADR 0002](adr/0002-reuse-cast-audio-receiver-lab.md): compose the existing
 Cast Audio Receiver Lab player with an original Sendspin output backend and an
 actual `aiosendspin` **server**. Software adapter testing can proceed while the
 real sender/authentication gate is open; it does not pass that gate. Prove the
@@ -66,7 +114,7 @@ For every result record these separately:
 | Level | Required evidence | Current receiver/Sendspin status |
 | --- | --- | --- |
 | Implemented | Reviewed executable adapter and dependency pins | Not implemented |
-| Automatically tested | Real library/decoder tests; mocks labeled as mocks | No adapter tests yet; foundation tests only |
+| Automatically tested | Real library/decoder tests; mocks labeled as mocks | MA Python composition has simulator-backed socket tests; independent Sendspin/decoder path remains unverified |
 | Started in Home Assistant | Supervisor install/start/Ingress/restart evidence | Not tested; CI image start is not Supervisor |
 | Real Google Cast sender | Sender/device/app versions, actual LAN discovery/auth/load/controls | Not tested for selected reused receiver |
 | Real Sendspin client | Firmware/protocol, negotiated audio and actual output | Not tested |
@@ -76,8 +124,10 @@ Do not download or bootstrap separately distributed Cast authentication material
 without a reviewed authorized path. Check [license and artifact gates](third-party.md)
 before packaging dependencies or publishing an image.
 
-The final gate is a phone discovering virtual `Sauna`, with real audio reaching
-`sauna-esp32` and its Bluetooth A2DP speaker, plus an independent track on
-`garten-player`. Power-cycle each output and check recovery and routing
+The current product gate is the real phone's **YouTube Music picker** showing
+all eligible Music Assistant audio targets, with `Sauna [CastSpin]` selected and
+real audio reaching the MA-managed `sauna-esp32` and its Bluetooth A2DP speaker,
+plus an independent track on the MA-managed `garten-player`. A Home Assistant
+entity or generic mDNS entry does not pass this gate. Power-cycle each output and check recovery and routing
 isolation. Persist IDs/mappings across App restart and upgrade. None of these
 outcomes follows from green unit tests or an App shell.

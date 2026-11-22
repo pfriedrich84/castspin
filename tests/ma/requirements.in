@@ -1,0 +1,4 @@
+# Software contract tests only; not installed in the Home Assistant App yet.
+# MPL source and native frontend source selection are recorded in ADR 0002.
+cast-audio-receiver-lab @ https://github.com/Allcrafter1/cast-audio-receiver-lab/archive/e56aa32df13168657a70ba42d97fd5821d8533cc.tar.gz#sha256=67cde225a54f170935dd807c2e8f9a223febbf1e78bbf2ba4946f12d733cf54f
+music-assistant-client==1.8.1

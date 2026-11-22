@@ -12,6 +12,31 @@ is copied into CastSpin by this change. Links and names identify sources; they
 do not imply endorsement. The existing HA foundation and its packaged base image
 remain separate from this planned receiver/Sendspin integration.
 
+## Music Assistant mirroring software prototype
+
+[ADR 0003](adr/0003-music-assistant-player-mirroring.md) adds original Apache-2.0
+adapter/inventory files. They import, rather than copy or modify, the pinned MPL
+`VibecastAudioPlayer` and its backend data types. The separate test environment
+installs that source archive at the exact reviewed revision and SHA-256 plus the
+official Apache-2.0 `music-assistant-client==1.8.1` and its exact
+`music-assistant-models==1.1.242` dependency. The hash locks and build procedure
+are under `tests/ma`; the source-wheel build does not acquire unpinned build
+requirements. No upstream authentication/bootstrap entrypoint is invoked.
+
+Installed distribution metadata confirms the following important mixed-license
+boundaries: the upstream player is MPL-2.0; `zeroconf==0.154.0` is
+LGPL-2.1-or-later; `orjson==3.13.0` declares
+`MPL-2.0 AND (Apache-2.0 OR MIT)`; `aiohttp==3.14.5` declares
+`Apache-2.0 AND MIT`. Other transitive dependencies and setuptools are pinned too;
+this is not a complete native/source bill of materials. Do not describe the
+resulting environment as entirely Apache-2.0 or all-permissive.
+
+The HA image does not install these third-party dependencies and does not ship a
+native receiver in this slice. Before packaging them, retain the actual wheel
+licenses/notices, inventory embedded native components, and provide applicable
+MPL/LGPL covered source and modifications under the release gate below. A source
+license does not clear the receiver's separate authentication artifacts.
+
 ## Planned component boundaries
 
 | Component / exact inspected source | License evidence | Required treatment before incorporation |
