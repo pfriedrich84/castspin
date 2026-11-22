@@ -12,9 +12,9 @@ import tempfile
 import threading
 
 from aiohttp import ClientSession, ClientTimeout
-from music_assistant_client import MusicAssistantClient
 
 from . import server
+from .ma_client import MusicAssistantClient
 from .ma_mirror import MusicAssistantMirror
 from .settings import ConfigurationError, Settings
 

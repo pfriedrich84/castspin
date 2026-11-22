@@ -39,6 +39,13 @@ zeroconf and mixed MPL/Apache/MIT orjson. Their corresponding source is retained
 without modification. These sources and notices are not relabeled Apache-2.0.
 The manifest and `installed-python.json` accompany the archives in the image.
 
+The installed MA SDK remains unmodified. CastSpin's small Apache-2.0 subclass in
+`app/ma_client.py` guards a reproduced SDK 1.8.1 race: a late reply to a cancelled
+RPC must not terminate the shared reader with `InvalidStateError` during cleanup.
+It delegates ordinary messages unchanged, does not retry requests or cancel
+remote writes, and is regression-tested against the actual pinned SDK. Review
+and remove this private-seam guard when an upstream version fixes the race.
+
 Source archives can contain optional components that are not installed here.
 No AirPlay CLI, mpv, FFmpeg, yt-dlp or Deno executable is copied from the reference
 image. MA owns media decoding/delivery. Native optional resolver fallbacks that

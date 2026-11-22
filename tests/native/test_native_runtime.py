@@ -162,7 +162,10 @@ class NativeRuntimeTests(unittest.IsolatedAsyncioTestCase):
         self.stop.set()
         await asyncio.wait_for(self.task, 20)
         self.assertIsNotNone(self.runtime.process.returncode)
-        self.assertEqual(self.api.queue("garten").state, PlaybackState.IDLE)
+        self.assertEqual(self.api.queue("garten").state, PlaybackState.IDLE,
+                         {"runtime": self.runtime.snapshot,
+                          "writes": [(command, args.get("queue_id", args.get("player_id")))
+                                     for command, args in self.api.writes()]})
         self.assertFalse(self.runtime.snapshot["cleanup_unconfirmed"])
         self.assertFalse(self.runtime.snapshot["audio_verified"])
         # Native installation state plus stable bridge IDs must preserve Cast

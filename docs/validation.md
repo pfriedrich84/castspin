@@ -84,6 +84,13 @@ recover ambiguous writes. Failed runtimes withdraw native receivers while
 keeping diagnostic Ingress available.
 The API's check/control race with other controllers is not eliminated.
 
+Cancellation regression: the pinned SDK 1.8.1 can receive a reply while its
+cancelled future is still registered, raising `InvalidStateError` and tearing
+down the shared reader before other routes can stop. Tests reproduce that defect
+in the unmodified SDK and check the narrow subclass guard used by the runtime,
+including late success/error/partial replies and subsequent live results. This
+guard does not replay a request or claim to cancel a remote operation.
+
 Remaining acceptance: real App installation/native state persistence and mDNS;
 reviewed authorized Cast authentication; actual YouTube Music app ID/session and
 picker visibility; media URL/header/proxy reachability **from MA**; decoded and
