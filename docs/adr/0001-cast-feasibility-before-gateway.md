@@ -1,7 +1,9 @@
 # ADR 0001 — Gate the gateway on real Cast reception
 
 - Date: 2026-11-22
-- Status: Accepted for investigation; production receiver selection is deferred
+- Status: Partially superseded by [ADR 0002](0002-reuse-cast-audio-receiver-lab.md)
+  for receiver selection and implementation sequencing (decisions 2 and 5).
+  Authentication, licensing and evidence safeguards remain in force.
 - Tracks: [Issue #1](https://github.com/pfriedrich84/castspin/issues/1)
 
 ## Context

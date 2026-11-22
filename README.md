@@ -12,16 +12,28 @@ Add `https://github.com/pfriedrich84/castspin` as a custom repository under Home
 
 The UI reports current implementation status. See [app documentation](castspin/DOCS.md).
 
-## Roadmap
+## Architecture and roadmap
 
-1. Home Assistant App packaging, Ingress UI and health endpoint.
-2. Prove a real virtual Google Cast receiver against sender applications and authentication/discovery.
-3. Sendspin output server, audio pipeline, independent playback sessions.
-4. Automatic discovery, persistent mapping and status/volume/playback controls.
-5. Sauna ESP32-A2DP and Garden end-to-end validation.
-6. Optional standalone Docker Compose deployment.
+Reuse [Cast Audio Receiver Lab](https://github.com/Allcrafter1/cast-audio-receiver-lab)
+for the existing Cast receiver/session/player implementation. CastSpin's primary
+contribution is a Sendspin output backend using the real Sendspin server library,
+not another Cast receiver. See [ADR 0002](docs/adr/0002-reuse-cast-audio-receiver-lab.md)
+and the [pinned component analysis](docs/receiver-reuse-analysis.md).
 
-A Google Cast controller library is **not** a Cast receiver.
+0. **P0:** Reuse decision, output seams and licensing review.
+1. **P1:** One actual Cast sender → reused receiver → Sendspin client → audible
+   playback. The HA foundation is already present, but this audio milestone is not.
+2. **P2:** Independent receiver/client routing and controls for multiple rooms.
+3. **P3:** Home Assistant App discovery and persistent device mapping, reusing
+   existing upstream structures where feasible. HA is the primary product.
+4. **P4:** Reconnect, stability, hardware/upgrade tests, release and documentation.
+5. **P5:** Optional standalone Docker Compose deployment.
+
+Bounds, HTTPS verification and cleanup are part of the first audio slice, not
+postponed hardening. Source reuse does not authorize the reference project's
+separate authentication bundle; no such material is adopted. A Google Cast
+controller library is **not** a Cast receiver. Spotify Cast, DRM and native
+Google Home speaker groups are not claimed as supported.
 
 ## Development and validation
 
@@ -33,4 +45,4 @@ See [validation](docs/validation.md) for the remaining gates.
 
 ## License
 
-Original CastSpin code: [Apache License 2.0](LICENSE). Third-party components retain their own licenses. In particular, code adapted from MPL-2.0 projects requires compliance with MPL-2.0 for the relevant files.
+Original CastSpin code: [Apache License 2.0](LICENSE). Third-party components retain their own licenses. In particular, code adapted from MPL-2.0 projects requires compliance with MPL-2.0 for the relevant files. See the [third-party review and release obligations](docs/third-party.md); no third-party receiver or Sendspin implementation has been incorporated yet.
