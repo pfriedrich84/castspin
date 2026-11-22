@@ -1,0 +1,17 @@
+name: CastSpin
+slug: castspin
+version: "0.1.0"
+description: Experimental Google Cast to Sendspin gateway (foundation only)
+url: https://github.com/pfriedrich84/castspin
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+init: false
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:cast-audio
+panel_title: CastSpin
+options: {}
+schema: {}
