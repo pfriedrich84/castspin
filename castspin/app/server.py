@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 PORT = int(os.environ.get("CASTSPIN_PORT", "8099"))
-CONFIG = Path(os.environ.get("CASTSPIN_CONFIG", "/addon_configs/castspin/mappings.json"))
+CONFIG = Path(os.environ.get("CASTSPIN_CONFIG", "/data/mappings.json"))
 
 
 def read_mappings():
