@@ -20,7 +20,7 @@ adapter/inventory files. They import, rather than copy or modify, the pinned MPL
 installs that source archive at the exact reviewed revision and SHA-256 plus the
 official Apache-2.0 `music-assistant-client==1.8.1` and its exact
 `music-assistant-models==1.1.242` dependency. The hash locks and build procedure
-are under `tests/ma`; the source-wheel build does not acquire unpinned build
+are under `castspin/`; the source-wheel build does not acquire unpinned build
 requirements. No upstream authentication/bootstrap entrypoint is invoked.
 
 Installed distribution metadata confirms the following important mixed-license
@@ -31,11 +31,15 @@ LGPL-2.1-or-later; `orjson==3.13.0` declares
 this is not a complete native/source bill of materials. Do not describe the
 resulting environment as entirely Apache-2.0 or all-permissive.
 
-The HA image does not install these third-party dependencies and does not ship a
-native receiver in this slice. Before packaging them, retain the actual wheel
-licenses/notices, inventory embedded native components, and provide applicable
-MPL/LGPL covered source and modifications under the release gate below. A source
-license does not clear the receiver's separate authentication artifacts.
+The current App recipe installs these components and copies only the pinned
+native receiver binary and required notices from the reference image, never its
+entrypoint or unrelated executables. [Component provenance](../castspin/UPSTREAM.md)
+and `castspin/sources.json` record the immutable OCI index/source revisions and
+source hashes. The recipe retains full vendored native source, the unmodified
+MPL player archive, every selected Python runtime/build sdist, wheel notices and
+package inventories. Source retention has been locally checksum-validated; a
+new container build, final shipped-artifact audit and publication remain separate
+gates. A source license does not clear the separate authentication artifacts.
 
 ## Planned component boundaries
 

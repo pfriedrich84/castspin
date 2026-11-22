@@ -41,8 +41,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install hashed build and real-library dependencies
         run: |
-          python -m pip install --require-hashes -r tests/ma/build-requirements.txt
-          python -m pip install --require-hashes --no-build-isolation -r tests/ma/requirements.txt
+          python -m pip install --require-hashes -r castspin/build-requirements.txt
+          python -m pip install --require-hashes --no-build-isolation -r castspin/requirements.txt
           python -m pip check
       - name: Test SDK and reused player with explicit MA API simulator
         run: python -W error::ResourceWarning -m unittest discover -s tests/ma -v
@@ -60,19 +60,41 @@ jobs:
             runner: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
       - name: Build Home Assistant App on native architecture
         run: docker build --tag castspin:test castspin
       - name: Smoke-test the actual image (not a Supervisor install)
         shell: bash
         run: |
           set -euo pipefail
-          docker run --detach --name castspin-test --publish 127.0.0.1:8099:8099 castspin:test
-          trap 'docker logs castspin-test; docker rm --force castspin-test' EXIT
+          docker run --detach --name castspin-test --network host castspin:test
+          trap 'docker stop --time 60 castspin-test; docker logs castspin-test; docker rm --force castspin-test' EXIT
           curl --fail --retry 20 --retry-all-errors --retry-delay 1 --connect-timeout 2 --max-time 3 http://127.0.0.1:8099/healthz > /tmp/health.json
           python3 - <<'PY'
           import json
-          from pathlib import Path
-          value = json.loads(Path('/tmp/health.json').read_text())
-          assert value == {'status': 'ok', 'cast_receiver': 'not_implemented', 'sendspin': 'not_implemented'}, value
+          import time
+          from urllib.request import urlopen
+          for attempt in range(20):
+              with urlopen('http://127.0.0.1:8099/healthz', timeout=3) as response:
+                  value = json.load(response)
+              if value.get('cast_receiver') == 'disabled':
+                  break
+              time.sleep(0.25)
+          assert value['status'] == 'ok' and value['cast_receiver'] == 'disabled', value
+          assert value['audio_verified'] is False, value
+          assert value['sendspin'] == 'managed_by_music_assistant', value
           PY
           docker exec castspin-test test -s /usr/share/licenses/castspin/LICENSE
+          docker exec castspin-test test -s /usr/share/licenses/castspin/sources/manifest.json
+          docker exec castspin-test test -s /usr/share/licenses/castspin/sources/vibecast-vendored-source-0.8.0-dev2.tar.gz
+          docker cp castspin-test:/usr/local/bin/vibecast /tmp/castspin-native
+      - name: Native Cast wire/media-fetch test (simulated MA; not phone or audible acceptance)
+        env:
+          CASTSPIN_NATIVE_BINARY: /tmp/castspin-native
+        run: |
+          python -m pip install --require-hashes -r castspin/build-requirements.txt
+          python -m pip install --require-hashes --no-build-isolation -r castspin/requirements.txt
+          python -m pip install --require-hashes -r tests/native/requirements.txt
+          python -W error::ResourceWarning -m unittest discover -s tests/native -v

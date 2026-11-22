@@ -26,12 +26,32 @@ def receiver_id(server_id, player_id):
     ).hex
 
 
-def exportable(player):
-    """Mirror user-facing MA playback targets, not hidden/internal/own devices."""
-    return (player.type in {PlayerType.PLAYER, PlayerType.STEREO_PAIR, PlayerType.GROUP}
-            and player.enabled and not player.private and MARKER not in player.name
-            and not (player.device_info.model or "").casefold().startswith("castspin")
-            and not (player.device_info.manufacturer or "").casefold().startswith("castspin"))
+def own_target(player):
+    return (MARKER in player.name
+            or (player.device_info.model or "").casefold().startswith("castspin")
+            or (player.device_info.manufacturer or "").casefold().startswith("castspin"))
+
+
+def exportable(player, inventory=()):
+    """Exclude own targets, including groups that would feed audio back to us."""
+    if (player.type not in {PlayerType.PLAYER, PlayerType.STEREO_PAIR, PlayerType.GROUP}
+            or not player.enabled or player.private or own_target(player)):
+        return False
+    known = {item.player_id: item for item in inventory}
+    pending = list(player.group_members) + list(player.static_group_members)
+    seen = {player.player_id}
+    while pending:
+        key = pending.pop()
+        if key in seen:
+            continue
+        seen.add(key)
+        child = known.get(key)
+        if child is not None:
+            if own_target(child):
+                return False
+            pending.extend(child.group_members)
+            pending.extend(child.static_group_members)
+    return True
 
 
 @dataclass
@@ -51,6 +71,7 @@ class MusicAssistantMirror:
         self.timeout = timeout
         self.routes: dict[str, Route] = {}
         self.cleanup_unconfirmed = False
+        self.requires_attention = False
 
     async def run(self, initialized=None):
         ready, changed = asyncio.Event(), asyncio.Event()
@@ -95,7 +116,7 @@ class MusicAssistantMirror:
 
     async def reconcile(self):
         targets = {player.player_id: player for player in self.client.players
-                   if exportable(player)}
+                   if exportable(player, self.client.players)}
         duplicates = Counter(player.name for player in targets.values())
         names = {key: player.name + (" · " + receiver_id(
             self.client.server_info.server_id, key)[-6:] if duplicates[player.name] > 1 else "")
@@ -107,7 +128,8 @@ class MusicAssistantMirror:
             if key in self.routes:
                 continue
             backend = MusicAssistantBackend(self.client, key, timeout=self.timeout,
-                                            manage_connection=False)
+                                            manage_connection=False,
+                                            admit=lambda p: exportable(p, self.client.players))
             await backend.start()
             player = VibecastAudioPlayer(
                 self.bridge_url, receiver_id(self.client.server_info.server_id, key),
@@ -125,14 +147,18 @@ class MusicAssistantMirror:
             # A disconnected server cannot confirm a Stop; never claim cleanup
             # or stop an arbitrary replacement item on the next connection.
             self.cleanup_unconfirmed = True
+        finally:
+            self.requires_attention |= route.backend.command_outcome_unknown
 
     def status(self):
         """Safe diagnostics: no token, media URL, metadata or raw SDK errors."""
-        return {"cleanup_unconfirmed": self.cleanup_unconfirmed, "routes": [
+        return {"cleanup_unconfirmed": self.cleanup_unconfirmed,
+                "requires_attention": self.requires_attention, "routes": [
             {"music_assistant_player_id": key, "name": route.name,
              "receiver_id": route.player.player_id,
              "playback_state": route.backend.status().state,
              "command_outcome_unknown": route.backend.command_outcome_unknown,
+             "command_pending": route.backend.load_pending,
              "notification_failed": route.backend.notification_failed}
             for key, route in self.routes.items()
         ]}

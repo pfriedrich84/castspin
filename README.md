@@ -9,10 +9,12 @@ selecting `Garten [CastSpin]` should use its garden player. Music Assistant keep
 ownership of Sendspin and other configured audio transports. An MA-managed ESP32
 A2DP source may forward audio to a Bluetooth speaker.
 
-> **Current App status: foundation only.** No operational receiver or playback
-> yet. A software mirroring/control prototype is tested separately; it is not
-> enabled in the App. Real YouTube Music discovery, Cast authentication and
-> audible playback remain unverified.
+> **Current source status: experimental HA runtime integration.** The App can
+> compose the reused native receiver with the automatic MA mirror, but defaults
+> to disabled and requires operator-supplied authorized Cast identity material.
+> A native mDNS/Cast/media-fetch software test passes with generated fixtures and
+> a simulated MA server. A real HA installation, phone YouTube Music, Google-rooted
+> authentication and audible playback remain unverified.
 
 ## Home Assistant App (preview)
 
@@ -51,14 +53,16 @@ Google Home speaker groups are not claimed as supported.
 ## Development and validation
 
 Run `python3 -m unittest discover -s tests -v` and `sh -n castspin/run.sh`.
-CI runs the HTTP contract tests on Python 3.13–3.15 and builds and starts the
-actual App image on native amd64 and aarch64 runners. These are **not** a
-Home Assistant Supervisor installation or a Cast/Sendspin audio acceptance test.
+CI is configured for HTTP/runtime/MA contracts on Python 3.13–3.15, native
+amd64/aarch64 App builds and a native receiver test using the image's binary.
+A configured job is not evidence that it ran or passed on an unpublished head.
+These checks are **not** a Home Assistant Supervisor installation or a real
+YouTube Music / audible acceptance test.
 For the separate real-library/loopback mirroring tests, use the hashed dependency
-installation procedure in [validation](docs/validation.md#music-assistant-mirroring-software-prototype).
+installation procedure in [validation](docs/validation.md#music-assistant-mirroring).
 Their MA server is a simulator, not a live MA installation or an audio endpoint.
 See [validation](docs/validation.md) for the remaining gates.
 
 ## License
 
-Original CastSpin code: [Apache License 2.0](LICENSE). Third-party components retain their own licenses. In particular, code adapted from MPL-2.0 projects requires compliance with MPL-2.0 for the relevant files. See the [third-party review and release obligations](docs/third-party.md). The mirroring prototype imports unmodified, pinned upstream Python components in its test environment; no native receiver or new audio transport is shipped in the App yet.
+Original CastSpin code: [Apache License 2.0](LICENSE). Third-party components retain their own licenses. In particular, code adapted from MPL-2.0 projects requires compliance with MPL-2.0 for the relevant files. See the [third-party review and release obligations](docs/third-party.md). The runtime imports unmodified, pinned MPL Python components and copies only the pinned MIT-based native receiver, not the reference product's entrypoint or unrelated output executables. The image recipe retains corresponding source archives, notices and package inventories; see [component provenance](castspin/UPSTREAM.md). No authentication credentials are acquired or shipped.

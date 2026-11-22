@@ -14,9 +14,12 @@ A passing process health check is not audio readiness. Keep these gates separate
 - Manual **not yet performed**: custom repository installation on Home Assistant
   Supervisor, Ingress access, stop/start, host reboot, update and uninstall.
 
-The image uses Home Assistant's released multi-architecture Alpine 3.24 base
-(`2026.11.0`), pinned to its OCI index digest. The old Alpine 3.20 base is EOL.
-Review and update both `castspin/Dockerfile` and `castspin/build.yaml` together.
+The runtime image recipe uses Home Assistant's released multi-architecture
+Debian Trixie base (`2026.11.0`), pinned to its OCI index digest. This replaces
+the Alpine foundation so the pinned glibc-based native receiver and Python wheels
+can be reused without compatibility shims. Update `castspin/Dockerfile` and
+`castspin/build.yaml` together. No local Docker daemon is available: the new
+image recipe itself has not been built locally; configured CI is not a result.
 
 ## Cast feasibility (blocks compatibility claims)
 
@@ -38,20 +41,21 @@ sanitized logs. At minimum:
 A generated fixture, synthetic sender, permissive controller, or mocked output
 can test code paths, but cannot pass this gate.
 
-## Music Assistant mirroring (software prototype)
+## Music Assistant mirroring
 
 [ADR 0003](adr/0003-music-assistant-player-mirroring.md) makes all public MA audio
 targets in the phone's YouTube Music picker the current product requirement. A
 single test receiver is only the first acceptance step. The independent
 Sendspin-server slice below is not required for MA-owned playback.
 
-Use a fresh Python >=3.13 virtual environment; the App does not install these
-dependencies or enable this prototype yet:
+Use a fresh Python >=3.13 virtual environment. The App recipe installs these same
+hashed dependencies; it stays disabled until configured, and never auto-acquires
+Cast identity material:
 
 ```sh
 python3 -m venv .venv-ma
-.venv-ma/bin/python -m pip install --require-hashes -r tests/ma/build-requirements.txt
-.venv-ma/bin/python -m pip install --require-hashes --no-build-isolation -r tests/ma/requirements.txt
+.venv-ma/bin/python -m pip install --require-hashes -r castspin/build-requirements.txt
+.venv-ma/bin/python -m pip install --require-hashes --no-build-isolation -r castspin/requirements.txt
 .venv-ma/bin/python -m pip check
 .venv-ma/bin/python -W error::ResourceWarning -m unittest discover -s tests/ma -v
 ```
@@ -74,8 +78,10 @@ receiver or real MA server and do not transfer or decode audio.
 A timeout/cancellation cannot cancel a remote MA operation. An already-applied
 LOAD can be identified and stopped; a still-unconfirmed LOAD reports an error
 rather than claiming cleanup or taking ownership of a prior identical URL.
-Future App integration must expose `command_outcome_unknown` and
-`cleanup_unconfirmed`; it must not replay or silently recover ambiguous writes.
+App status exposes `command_outcome_unknown`, `command_pending`,
+`requires_attention` and `cleanup_unconfirmed`; it does not replay or silently
+recover ambiguous writes. Failed runtimes withdraw native receivers while
+keeping diagnostic Ingress available.
 The API's check/control race with other controllers is not eliminated.
 
 Remaining acceptance: real App installation/native state persistence and mDNS;
@@ -84,6 +90,36 @@ picker visibility; media URL/header/proxy reachability **from MA**; decoded and
 audible output; every eligible target and existing MA group; recursion safeguards
 against actual MA discovery; simultaneous routes and restart/upgrade behavior.
 There is no live MA, phone, HA Supervisor or audible evidence for this slice.
+
+## Reused native receiver software acceptance
+
+Install `tests/native/requirements.txt` into the same environment. Set
+`CASTSPIN_NATIVE_BINARY` to the exact reviewed frontend binary (from the pinned
+component image), then run:
+
+```sh
+CASTSPIN_NATIVE_BINARY=/path/to/reviewed/vibecast .venv-ma/bin/python -W error::ResourceWarning -m unittest discover -s tests/native -v
+```
+
+The test requires local multicast, an assigned IPv4 interface and OpenSSL for
+**locally generated** one-day fixture TLS. It runs the actual native receiver,
+observes its real mDNS records, uses permissive PyChromecast for Cast V2 over
+TLS with the Default Media Receiver, and makes the real SDK instruct an **MA API
+simulator** to fetch synthetic WAV over HTTP. Two targets receive exact source
+bytes; pause/volume/stop are isolated, native cleanup is observed, and persistent
+Cast UUIDs plus no media replay are checked across runtime restart.
+
+Locally observed: native amd64 component at the index in `castspin/sources.json`,
+Python 3.13, generated media and real local sockets. This is not phone YTM or
+Google-rooted authentication, not real MA decoding/output, not a Sendspin client,
+and not sound. The native cache's YTM resolver/header/range path and a remote MA
+server are still separate acceptance gates. The native arm64 image and complete
+new App image have not been locally tested.
+
+Build-time source retention has been executed locally: all 21 selected source
+archives passed their pinned SHA-256 checks, including full vendored native
+source and Python covered sources. Static packaging tests check lock/source/base
+consistency; neither result proves a successful container build.
 
 ## Reused receiver / independent Sendspin adapter (not implemented)
 
@@ -113,8 +149,8 @@ For every result record these separately:
 
 | Level | Required evidence | Current receiver/Sendspin status |
 | --- | --- | --- |
-| Implemented | Reviewed executable adapter and dependency pins | Not implemented |
-| Automatically tested | Real library/decoder tests; mocks labeled as mocks | MA Python composition has simulator-backed socket tests; independent Sendspin/decoder path remains unverified |
+| Implemented | Executable adapter/runtime and dependency pins | MA-backed runtime implemented in source; independent Sendspin server not implemented |
+| Automatically tested | Real library/decoder tests; mocks labeled as mocks | Native amd64 mDNS/Cast/HTTP-fetch and SDK contracts with simulated MA; no MA output/decoder/Sendspin audio acceptance |
 | Started in Home Assistant | Supervisor install/start/Ingress/restart evidence | Not tested; CI image start is not Supervisor |
 | Real Google Cast sender | Sender/device/app versions, actual LAN discovery/auth/load/controls | Not tested for selected reused receiver |
 | Real Sendspin client | Firmware/protocol, negotiated audio and actual output | Not tested |

@@ -34,18 +34,24 @@ def http_url(value: str) -> str:
 class MusicAssistantBackend:
     """Implement the pinned upstream AudioBackend; never claim optimistic audio."""
 
+    # Ask the reused native resolver to retain HTTP request context in its
+    # bounded progressive-audio cache. Its LAN URL is then consumable by MA.
+    local_audio_cache = True
+
     def __init__(self, client: MusicAssistantClient, player_id: str, *, timeout=10,
-                 manage_connection=True):
+                 manage_connection=True, admit=None):
         self.client = client
         self.player_id = player_id
         self.timeout = timeout
         self.manage_connection = manage_connection
+        self.admit = admit
         self.metadata = MediaMetadata()
         self._status = PlaybackStatus(volume=0)
         self._listeners = []
         self._notifications = {}
         self.notification_failed = False
         self.command_outcome_unknown = False
+        self.load_pending = False
         self._controls = []
         self._reader = None
         self._shutdown_task = None
@@ -90,6 +96,7 @@ class MusicAssistantBackend:
         player = self.client.players.get(self.player_id)
         if (self._closed or not self.client.connection.connected or player is None
                 or not player.available or not player.enabled or player.private
+                or (self.admit is not None and not self.admit(player))
                 or player.needs_setup
                 or (player.type == PlayerType.PLAYER
                     and (player.synced_to or player.active_group
@@ -144,20 +151,24 @@ class MusicAssistantBackend:
             self._emit()
 
     async def _begin(self):
-        self._player()
-        before = await self._call(self.client.player_queues.get_active_queue(self.player_id))
-        self._previous_item_id = (before.current_item.queue_item_id
-                                  if before and before.current_item else None)
-        self._submitted = True  # A cancelled/failed request may have been applied.
-        self.command_outcome_unknown = True
-        self._status.state = "BUFFERING"
-        await self._call(self.client.player_queues.play_media(
-            self.player_id, self._status.url, option=QueueOption.REPLACE))
-        if await self._owned_queue() is None:
-            raise RuntimeError("Music Assistant did not confirm the requested queue item")
-        self.command_outcome_unknown = False
-        if self._start_time:
-            await self._call(self.client.player_queues.seek(self.player_id, self._start_time))
+        self.load_pending = True
+        try:
+            self._player()
+            before = await self._call(self.client.player_queues.get_active_queue(self.player_id))
+            self._previous_item_id = (before.current_item.queue_item_id
+                                      if before and before.current_item else None)
+            self._submitted = True  # A cancelled/failed request may have been applied.
+            self.command_outcome_unknown = True
+            self._status.state = "BUFFERING"
+            await self._call(self.client.player_queues.play_media(
+                self.player_id, self._status.url, option=QueueOption.REPLACE))
+            if await self._owned_queue() is None:
+                raise RuntimeError("Music Assistant did not confirm the requested queue item")
+            self.command_outcome_unknown = False
+            if self._start_time:
+                await self._call(self.client.player_queues.seek(self.player_id, self._start_time))
+        finally:
+            self.load_pending = False
 
     async def play(self):
         async with self._lock:

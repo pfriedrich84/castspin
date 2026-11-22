@@ -10,7 +10,7 @@ import sys
 import unittest
 from uuid import uuid4
 
-from aiohttp import web
+from aiohttp import web, ClientSession
 from cast_audio_lab.vibecast_player import VibecastAudioPlayer
 from music_assistant_client import MusicAssistantClient
 from music_assistant_models.enums import EventType, PlaybackState, PlayerType
@@ -49,6 +49,8 @@ class MaApiSimulator:
         self.ignore_load = False
         self.release = asyncio.Event()
         self.authorized = False
+        self.fetch_audio = False
+        self.received_audio = {}
 
     def queue(self, key):
         return self.queues.setdefault(key, PlayerQueue(
@@ -100,6 +102,11 @@ class MaApiSimulator:
                         pass
                     elif command == "player_queues/play_media":
                         assert args["option"] == "replace"
+                        if self.fetch_audio:
+                            async with ClientSession() as audio:
+                                async with audio.get(args["media"]) as response:
+                                    response.raise_for_status()
+                                    self.received_audio[key] = await response.read()
                         queue.current_item = QueueItem(
                             key, uuid4().hex, "Test", 60,
                             media_item=Radio(item_id=args["media"], provider="builtin",

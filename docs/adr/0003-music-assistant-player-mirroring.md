@@ -1,7 +1,7 @@
 # ADR 0003 — Mirror Music Assistant playback targets for YouTube Music
 
 - Date: 2026-11-22
-- Status: Accepted product direction; software composition prototype only
+- Status: Accepted direction; native/MA runtime integrated in source, real phone/audio acceptance open
 - Tracks: [Issue #7](https://github.com/pfriedrich84/castspin/issues/7)
 - Refines: [ADR 0002](0002-reuse-cast-audio-receiver-lab.md), especially its first
   output route and sequencing, not the receiver-reuse, licensing or auth gates
@@ -98,6 +98,23 @@ Still required before saying the owner's goal works:
   model/name fixtures. Test duplicate names, unavailable targets, restart/rename
   identity stability and real controller contention.
 
-The existing App health/UI remains an honest foundation preview. No Home
-Assistant Supervisor installation, stock phone discovery, YouTube Music audio,
-physical Sendspin or audible end-to-end acceptance is claimed by this change.
+### Runtime integration follow-up
+
+The own App runtime now starts the pinned native component and MA mirror, with
+HA options, read-only App configuration, persisted native state and diagnostic
+Ingress. Missing authorized credentials block startup; upstream auth bootstrap
+is never invoked. See `castspin/DOCS.md` and `castspin/UPSTREAM.md` for the actual
+configuration, license/source retention and immutable component provenance.
+
+The native player's existing progressive-audio cache is enabled; binding its
+bridge to the configured HA LAN address makes its URLs reachable from MA. This
+also exposes the upstream unauthenticated bridge to the trusted LAN; it must not
+be exposed publicly. Existing receiver/mirror self-exclusion now includes nested
+groups containing CastSpin targets, rechecked before output commands.
+
+Native amd64 software tests observe real mDNS, permissive Cast V2/TLS LOAD,
+SDK commands and exact HTTP audio bytes fetched by an MA simulator, plus controls,
+cleanup and stable native UUIDs across restart. Generated TLS is deliberately
+not Google-rooted authentication. The complete new App image is not locally built.
+No Supervisor installation, stock phone YTM discovery/authentication, real MA
+output, physical Sendspin or audible end-to-end acceptance is claimed.
